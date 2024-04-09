@@ -2,7 +2,7 @@ use std::env;
 use std::io;
 use std::io::Write;
 use std::fs;
-mod scanner;
+use mole::scanner;
 
 
 
@@ -34,7 +34,7 @@ fn run_prompt(){
 
         match line{
             key if key.to_lowercase() == "exit" => break,
-            key if key != ""                    => run(key),
+            key if !key.is_empty()              => run(key),
             _                                           => continue
         }
         
