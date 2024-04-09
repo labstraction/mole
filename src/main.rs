@@ -2,6 +2,9 @@ use std::env;
 use std::io;
 use std::io::Write;
 use std::fs;
+mod scanner;
+
+
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -31,7 +34,7 @@ fn run_prompt(){
 
         match line{
             key if key.to_lowercase() == "exit" => break,
-            key if !key.is_empty()              => scan(key),
+            key if key != ""                    => run(key),
             _                                           => continue
         }
         
@@ -49,6 +52,6 @@ fn run_file(path: &String){
 
 }
 
-fn scan(script: String){
-    println!("eccolo: {}", script)
+fn run(script: String){
+    scanner::scan(script);
 }
