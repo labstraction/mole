@@ -49,7 +49,8 @@ fn start_file(path: &str) -> Result<(), String>{
 }
 
 fn scan(script: String) -> Result<(), String>{
-    scanner::scan(script);
+    let tokens = scanner::scan(script);
+    println!("{:#?}", tokens);
     Ok(())
 }
 

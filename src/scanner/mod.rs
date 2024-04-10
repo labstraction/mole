@@ -1,4 +1,5 @@
-enum TokenType {
+#[derive(Debug)]
+pub enum TokenType {
     // Single-character tokens.
     LeftParen,
     RightParen,
@@ -48,6 +49,30 @@ enum TokenType {
     Eof,
 }
 
-pub fn scan(script: String) {
-    println!("scanning: {}", script)
+pub struct Token {
+  pub t_type: TokenType,
+  pub lexeme: String,
+  pub line: i32,
 }
+
+impl Token {
+    pub fn to_string(&self) -> String{
+      format!("line: {}, lexeme: {}", self.line, self.lexeme)
+    }
+}
+
+pub fn scan(script: String) -> Vec<TokenType>{
+    let mut tokens = Vec::new();
+    for c in script.chars()  {
+        match c {
+            '(' => tokens.push(TokenType::LeftParen),
+            _   => tokens.push(TokenType::Bang)
+        }
+    }
+
+    tokens.push(TokenType::Eof);
+
+    tokens
+}
+
+
