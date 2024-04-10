@@ -1,8 +1,8 @@
-use std::{fs, io::{self, Write}, process};
+use std::{fs, io::{self, Write}};
 
 use crate::{config::Config, scanner};
 
-pub fn start(config: Config){
+pub fn start(config: Config) -> Result<(), String>{
 
     if config.is_prompt() {
         start_prompt()
@@ -12,7 +12,7 @@ pub fn start(config: Config){
 
 }
 
-fn start_prompt(){
+fn start_prompt() -> Result<(), String>{
 
     loop {
 
@@ -29,33 +29,33 @@ fn start_prompt(){
 
         match line{
             key if key.to_lowercase() == "exit" => break,
-            key if !key.is_empty()              => scan(key),
-            _                                           => continue
+            key if !key.is_empty()              => scan(key).unwrap(),
+            _                                   => continue
         }
         
     }
 
-    process::exit(1);
+    Ok(())
 
 }
 
-fn start_file(path: &str){
+fn start_file(path: &str) -> Result<(), String>{
 
     match fs::read_to_string(path){
         Ok(content) => scan(content),
-        Err(error) => {display_error(error.to_string(), 0)}
+        Err(error) => Err(error.to_string())
     }
 
 }
 
-fn scan(script: String){
+fn scan(script: String) -> Result<(), String>{
     scanner::scan(script);
+    Ok(())
 }
 
-fn display_error(message: String, line: i32) {
+pub fn display_error(message: String, line: i32) {
     let report = create_report(message, line);
     eprintln!("{}", report);
-    process::exit(1);
 }
 
 fn create_report(message: String, line: i32) -> String{
