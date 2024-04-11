@@ -65,6 +65,24 @@ impl Token {
     }
 
     pub fn to_string(&self) -> String{
-      format!("type: {}, lexeme: {}, literal:{}", self.t_type, self.lexeme, self.literal)
+        format!("type: {}, lexeme: {}, literal:{}", self.t_type, self.lexeme, self.literal)
+    }
+}
+
+#[derive(Debug)]
+pub struct Scanner {
+  pub source: String,
+  pub tokens: Vec<Token>
+}
+
+
+impl Scanner {
+
+    pub fn new(source: String) -> Scanner{
+        Scanner(source, Vec::new());
+    }
+
+    pub fn to_string(&self) -> String{
+        format!("type: {}, lexeme: {}, literal:{}", self.t_type, self.lexeme, self.literal)
     }
 }
