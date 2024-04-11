@@ -30,7 +30,7 @@ fn start_prompt() -> Result<(), String>{
         match line{
             key if key.to_lowercase() == "exit" => break,
             key if !key.is_empty()              => scan(key).unwrap(),
-            _                                   => continue
+            _                                           => continue
         }
         
     }
@@ -49,7 +49,10 @@ fn start_file(path: &str) -> Result<(), String>{
 }
 
 fn scan(script: String) -> Result<(), String>{
-    let tokens = scanner::scan(script);
+    let tokens = match scanner::scan(script){
+        Ok(tokens) => tokens,
+        Err(message) => return Err(message)
+    };
     println!("{:#?}", tokens);
     Ok(())
 }

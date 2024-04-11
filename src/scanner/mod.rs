@@ -49,6 +49,7 @@ pub enum TokenType {
     Eof,
 }
 
+#[derive(Debug)]
 pub struct Token {
   pub t_type: TokenType,
   pub lexeme: String,
@@ -56,23 +57,39 @@ pub struct Token {
 }
 
 impl Token {
+
+    pub fn new(t_type: TokenType, lexeme: String) -> Token{
+        Token{t_type, lexeme, line: 0}
+    }
+
     pub fn to_string(&self) -> String{
       format!("line: {}, lexeme: {}", self.line, self.lexeme)
     }
 }
 
-pub fn scan(script: String) -> Vec<TokenType>{
+pub fn scan(script: String) -> Result<Vec<Token>, String>{
     let mut tokens = Vec::new();
     for c in script.chars()  {
-        match c {
-            '(' => tokens.push(TokenType::LeftParen),
-            _   => tokens.push(TokenType::Bang)
-        }
+        let t_type = match c {
+            '(' => TokenType::LeftParen,
+            ')' => TokenType::RightParen,
+            '{' => TokenType::LeftBrace,
+            '}' => TokenType::RightBrace,
+            ',' => TokenType::Comma,
+            '.' => TokenType::Dot,
+            '-' => TokenType::Minus,
+            '+' => TokenType::Plus,
+            ';' => TokenType::Semicolon,
+            '*' => TokenType::Star,
+             _  => return Err(format!("Unexpected character: {}", c)),
+            
+        };
+        tokens.push(Token::new(t_type, c.to_string()))
     }
 
-    tokens.push(TokenType::Eof);
+    tokens.push(Token::new(TokenType::Eof, String::from("")));
 
-    tokens
+    Ok(tokens)
 }
 
 
