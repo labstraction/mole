@@ -1,6 +1,6 @@
 use std::{fs, io::{self, Write}};
 
-use crate::{config::Config, scanner};
+use crate::{config::Config, scanner, scanner2};
 
 pub fn start(config: Config) -> Result<(), String>{
 
@@ -49,11 +49,13 @@ fn start_file(path: &str) -> Result<(), String>{
 }
 
 fn scan(script: String) -> Result<(), String>{
-    let tokens = match scanner::scan(script){
-        Ok(tokens) => tokens,
-        Err(message) => return Err(message)
-    };
-    println!("{:#?}", tokens);
+    let mut scanner = scanner2::Scanner::new(script);
+    scanner.scan_tokens();
+    // let tokens = match scanner::scan(script){
+    //     Ok(tokens) => tokens,
+    //     Err(message) => return Err(message)
+    // };
+    println!("{:#?}", scanner);
     Ok(())
 }
 

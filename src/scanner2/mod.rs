@@ -51,6 +51,8 @@ pub enum TokenType {
 #[derive(Debug)]
 pub enum Literal {
     Empty,
+    String(String),
+    Number(f64),
 }
 
 #[derive(Debug)]
@@ -144,9 +146,112 @@ impl Scanner {
         true
     }
 
-    fn peek(&self) -> char{
-        if self.is_at_end() { return '\0'};
+    fn peek(&self) -> char {
+        if self.is_at_end() {
+            return '\0';
+        };
         return self.source.chars().nth(self.current).unwrap_or(' ');
+    }
+
+    fn parse_string(&mut self) {
+        while self.peek() != '"' && !self.is_at_end() {
+            if self.peek() == '\n' {
+                self.line += 1;
+            }
+            self.advance();
+        }
+
+        if self.is_at_end() {
+            print!("Unterminated string.");
+            return;
+        }
+
+        // The closing ".
+        self.advance();
+
+        // Trim the surrounding quotes.
+        let value = self
+            .source
+            .get(self.start + 1..self.current - 1)
+            .unwrap_or("");
+
+        self.add_token(TokenType::String, Literal::String(String::from(value)))
+    }
+
+    fn is_digit(c: char) -> bool {
+        c.is_ascii_digit()
+    }
+
+    fn peek_next(&self) -> char {
+        if self.current + 1 >= self.source.len() {
+            return '\0';
+        }
+        self.source.chars().nth(self.current + 1).unwrap_or(' ')
+    }
+
+    fn parse_number(&mut self) {
+        while Scanner::is_digit(self.peek()) {
+            self.advance();
+        }
+
+        if self.peek() == '.' && Scanner::is_digit(self.peek_next()) {
+            // Consume the "."
+            self.advance();
+
+            while Scanner::is_digit(self.peek()) {
+                self.advance();
+            }
+        }
+
+        let value = self.source.get(self.start..self.current).unwrap_or("");
+
+        self.add_token(
+            TokenType::Number,
+            Literal::Number(value.parse::<f64>().unwrap_or(0.0)),
+        );
+    }
+
+    fn is_alphabetic(c: char) -> bool{
+        c.is_ascii_alphabetic() || c == '_'
+    }
+
+    fn is_alphanumeric(c: char) -> bool{
+        Scanner::is_alphabetic(c) || Scanner::is_digit(c)
+    }
+
+    fn find_keyword(text: &str) -> Option<TokenType>{
+        match text {
+            "and" => Some(TokenType::And),
+            "class" => Some(TokenType::Class),
+            "else" => Some(TokenType::Else),
+            "false" => Some(TokenType::False),
+            "for" => Some(TokenType::For),
+            "fun" => Some(TokenType::Fun),
+            "if" => Some(TokenType::If),
+            "nil" => Some(TokenType::Nil),
+            "or" => Some(TokenType::Or),
+            "print" => Some(TokenType::For),
+            "return" => Some(TokenType::Return),
+            "super" => Some(TokenType::Super),
+            "this" => Some(TokenType::This),
+            "true" => Some(TokenType::True),
+            "var" => Some(TokenType::Var),
+            "while" => Some(TokenType::While),
+            _ => None
+        }
+    }
+
+    fn parse_identifier(&mut self){
+        while Scanner::is_alphanumeric(self.peek()) {self.advance();}
+        let value = self.source.get(self.start..self.current).unwrap_or("");
+        println!("{}",value);
+        let option = Scanner::find_keyword(value);
+        let t_type = match option {
+            Some(t_type) => t_type,
+            None => TokenType::Identifier
+        };
+
+        self.add_token(t_type, Literal::Empty)
     }
 
     fn scan_token(&mut self) {
@@ -191,13 +296,26 @@ impl Scanner {
                 }
             }
             '/' => {
-                if self.check('/')  {
-                    while self.peek() != '\n' && !self.is_at_end(){ self.advance();};
-                  } else {
+                if self.check('/') {
+                    while self.peek() != '\n' && !self.is_at_end() {
+                        self.advance();
+                    }
+                } else {
                     self.add_token(TokenType::Slash, Literal::Empty)
-                  }
+                }
             }
-            _ => self.add_token(TokenType::Eof, Literal::Empty),
+            ' ' | '\r' | '\t' => (),
+            '\n' => self.line += 1,
+            '"' => self.parse_string(),
+            other => {
+                if Scanner::is_digit(other) {
+                    self.parse_number()
+                } else if Scanner::is_alphabetic(other) {
+                    self.parse_identifier()
+                } else {
+                    self.add_token(TokenType::Eof, Literal::Empty)
+                }
+            }
         };
     }
 }
