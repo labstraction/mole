@@ -64,10 +64,10 @@ pub fn display_error(message: String, line: i32) {
 
 fn create_report(message: String, line: i32) -> String{
 
-    return if line > 0 { 
+    if line > 0 { 
         format!("[line {}] Error: {}", line, message)} 
     else {
         format!("Error: {}", message)
-    };
+    }
     
 }
