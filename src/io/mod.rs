@@ -25,12 +25,12 @@ pub fn prompt_repl() -> Result<String, String>{
 
 }
 
-pub fn display_error(message: String, line: i32) {
+pub fn display_error(message: String, line: usize) {
     let report = create_report(message, line);
     eprintln!("{}", report);
 }
 
-fn create_report(message: String, line: i32) -> String{
+fn create_report(message: String, line: usize) -> String{
 
     if line > 0 { 
         format!("[line {}] Error: {}", line, message)} 

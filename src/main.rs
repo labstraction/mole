@@ -1,13 +1,9 @@
 use std::env;
-use mole::{config::Config, io::{display_error, prompt_repl, read_file}};
+use mole::{config::Config, io, scanner2};
 
 fn main() {
 
     let config = Config::create(env::args().collect());
-    // if let Err(message) = ui::start(config) {
-    //     ui::display_error(message, 0);
-    //     process::exit(1);
-    // }
     run(config);
 
 }
@@ -25,14 +21,17 @@ fn run(config: Config){
 
 fn run_file(config: Config){
 
-    let content = match read_file(config.file_path().unwrap()) {
-        Ok(content) => content,
+    match io::read_file(config.file_path().unwrap()) {
+        Ok(content) => match scanner2::scan(&content) {
+            Ok(tokens) => println!("{:#?}", tokens),
+            Err((line, message)) => io::display_error(message, line)
+        },
         Err(message) => {
-            display_error(message, 0);
+            io::display_error(message, 0);
             return;
         }
     };
-    println!("{}", content);
+
     
 }
 
@@ -40,10 +39,20 @@ fn run_repl(){
 
     loop {
 
-        match prompt_repl() {
-            Ok(content) => println!("{}", content),
+        match io::prompt_repl() {
+            Ok(content) => {
+                match content.as_str() {
+                    "exit" => break,
+                    other => {
+                        match scanner2::scan(other) {
+                            Ok(tokens) => println!("{:#?}", tokens),
+                            Err((line, message)) => io::display_error(message, line)
+                        }
+                    }
+                }
+            },
             Err(message) => {
-                display_error(message, 0);
+                io::display_error(message, 0);
                 break;
             }
         }

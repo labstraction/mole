@@ -1,3 +1,6 @@
-ciao
-miao
-bau
+var pippo = "ciao";
+var pluto = true;
+
+while(pluto){
+    print(pippo);
+}
